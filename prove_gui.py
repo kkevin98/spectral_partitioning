@@ -1,11 +1,69 @@
-from tkinter import *
-from tkinter import ttk
-root = Tk()
-l =ttk.Label(root, text="Starting...")
-l.grid()
-l.bind('<Enter>', lambda e: l.configure(text='Moved mouse inside'))
-l.bind('<Leave>', lambda e: l.configure(text='Moved mouse outside'))
-l.bind('<1>', lambda e: l.configure(text='Clicked left mouse button'))
-l.bind('<Double-1>', lambda e: l.configure(text='Double clicked'))
-l.bind('<B3-Motion>', lambda e: l.configure(text='right button drag to %d,%d' % (e.x, e.y)))
-root.mainloop()
+#!/usr/bin/env python3
+
+"""
+ZetCode Tkinter tutorial
+
+In this program, we use the
+tkFileDialog to select a file from
+a filesystem.
+
+Author: Jan Bodnar
+Website: www.zetcode.com
+"""
+
+from tkinter import Frame, Tk, BOTH, Text, Menu, END
+from tkinter import filedialog
+
+class Example(Frame):
+
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+
+    def initUI(self):
+
+        self.master.title("File dialog")
+        self.pack(fill=BOTH, expand=1)
+
+        menubar = Menu(self.master)
+        self.master.config(menu=menubar)
+
+        fileMenu = Menu(menubar)
+        fileMenu.add_command(label="Open", command=self.onOpen)
+        menubar.add_cascade(label="File", menu=fileMenu)
+
+        self.txt = Text(self)
+        self.txt.pack(fill=BOTH, expand=1)
+
+
+    def onOpen(self):
+
+        ftypes = [('Python files', '*.py'), ('All files', '*')]
+        dlg = filedialog.Open(self, filetypes = ftypes)
+        fl = dlg.show()
+
+        if fl != '':
+            text = self.readFile(fl)
+            self.txt.insert(END, text)
+
+
+    def readFile(self, filename):
+
+        with open(filename, "r") as f:
+            text = f.read()
+
+        return text
+
+
+def main():
+
+    root = Tk()
+    ex = Example()
+    root.geometry("300x250+300+300")
+    root.mainloop()
+
+
+if __name__ == '__main__':
+    main()#!/usr/bin/env python3

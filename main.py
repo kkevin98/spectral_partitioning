@@ -9,6 +9,7 @@ from networkx.classes.function import number_of_selfloops, number_of_nodes, numb
 from my_network_lib import remove_self_edges, spectral_partitioning
 from prove import second_spectral_partitioning
 from networkx.algorithms.components import is_connected
+import pandas as pd
 
 
 # Per creare un grafo casuale
@@ -23,16 +24,29 @@ if not nx.is_connected(test_graph):
     nx.write_edgelist(test_graph, "test_10_nodi.edgelist")
 """
 
+
+# Per leggere i nodi da un csv con pandas
+nodes = pd.read_csv("/home/utente/Scaricati/Tesi/index_flight.csv")
+data = nodes.set_index('Index').to_dict('index').items()
+print(type(data))
+F = nx.Graph()
+F.add_nodes_from(data)
+print("I nodi sono: ", number_of_nodes(F))
+# for i in range(20):
+#     print(F.nodes[i])
+
 # Per leggere un edgelist
 with open ("/home/utente/Scaricati/Tesi/edgelist_3", "rb") as fp:
     edgelist = pickle.load(fp)
 print("ho caricato il grafo")
-F = nx.Graph()
+# F = nx.Graph()
 F.add_edges_from(edgelist)
 print("I nodi sono: ", number_of_nodes(F))
 print("Gli archi sono: ", number_of_edges(F))
 if not is_connected(F):
     print("Proviamoci...")
+
+sys.exit()
     
 """
 # Per mostrare e salvare il grafo in ingresso sotto forma di png

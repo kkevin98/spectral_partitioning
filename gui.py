@@ -2,8 +2,11 @@ from tkinter import *
 from tkinter import ttk, filedialog, messagebox
 
 def fetch_path():
-    '''Ottiene il nome del file da aprire'''
-    '''Ancora da fare!!'''
+    '''
+    Ottiene il nome del file da aprire
+    Ancora da fare!!!
+    '''
+    # file_name = filedialog.askopenfilename(filetypes=)
 
 
 if __name__ == "__main__":

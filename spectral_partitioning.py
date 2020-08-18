@@ -1,5 +1,6 @@
 import networkx as nx
 import pickle
+import pandas as pd
 
 
 def _basic_partitioning(G, n1, n2):
@@ -13,8 +14,8 @@ def _basic_partitioning(G, n1, n2):
     :return: un sottografo, vista di G. La struttura del sottografo non può essere modificata
     """
 
-    # Lista si nodi ordinati secondo il vettore di Fiedler
-    ordered_nodes = nx.spectral_ordering(G) # Torna una list non un nunmpy array
+    # Lista di nodi ordinati secondo il vettore di Fiedler
+    ordered_nodes = nx.spectral_ordering(G)  # Torna una list non un nunmpy array
 
     component_test1 = set(ordered_nodes[:n1])
     component_test2 = set(ordered_nodes[:n2])
@@ -55,7 +56,7 @@ def spectral_partitioning(G, class_nodes):
     if nx.number_of_selfloops(G):
         raise nx.NetworkXNotImplemented("Graph with self-edges.")
 
-    classes = len(class_nodes) # numero delle componenti in cui dividere G
+    classes = len(class_nodes)  # numero delle componenti in cui dividere G
 
     if classes == 1:
         yield G
@@ -72,22 +73,29 @@ def spectral_partitioning(G, class_nodes):
                 yield from spectral_partitioning(component, class_nodes[half:])
 
 
-
 if __name__ == "__main__":
 
-    # Per leggere un edgelist.
-    with open("/home/utente/Scaricati/Tesi/edgelist_3", "rb") as fp:
-        edgelist = pickle.load(fp)
-
+    node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
+    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
+    write_directory = "/home/utente/Scaricati/Tesi/"
     F = nx.Graph()
+
+    # Per leggere i nodi di un grafo da un file csv.
+    nodes = pd.read_csv(node_csv_path)
+    data = nodes.set_index('Index').to_dict('index').items()
+    F.add_nodes_from(data)
+
+    # Per leggere una edgelist.
+    with open(edgelist_path, "rb") as fp:
+        edgelist = pickle.load(fp)
     F.add_edges_from(edgelist)
 
     print("I nodi sono: ", nx.number_of_nodes(F))
     print("Gli archi sono: ", nx.number_of_edges(F))
 
     # Numero di nodi in ciascuna classe.
-    nodes = [12191, 12191]
+    nodes = [14958, 14959]
 
     # Calcolo e salvataggio delle classi. Un file per ognuna di esse.
     for i, component in enumerate(spectral_partitioning(F, nodes)):
-        nx.write_gpickle(component, "/home/utente/Scaricati/Tesi/edgelist_component_{}".format(i + 1))
+        nx.write_gpickle(component, write_directory+"res_component_{}.pickle".format(i + 1))
