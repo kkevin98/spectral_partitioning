@@ -78,7 +78,7 @@ if __name__ == "__main__":
     # Per leggere un edgelist.
     with open("/home/utente/Scaricati/Tesi/edgelist_3", "rb") as fp:
         edgelist = pickle.load(fp)
-    print("ho caricato il grafo")
+
     F = nx.Graph()
     F.add_edges_from(edgelist)
 
