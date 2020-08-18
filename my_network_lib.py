@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 from networkx.linalg.algebraicconnectivity import algebraic_connectivity, fiedler_vector
 from networkx.algorithms.cuts import cut_size
+import matplotlib.pyplot as plt
 from networkx.classes.function import (
     nodes_with_selfloops,
     is_empty,
@@ -24,10 +25,12 @@ def graph_division(G, component):
     To use into spectral_partition.
     Works with simple graph.
     '''
+    result_G = G.copy()
     for n1 in component:
-        for n2 in nodes(G):
-            if n2 not in component and G.has_edge(n1, n2):
-                G.remove_edge(n1, n2)
+        for n2 in result_G.nodes:
+            if n2 not in component and result_G.has_edge(n1, n2):
+                result_G.remove_edge(n1, n2)
+    return result_G
 
 
 
@@ -90,16 +93,16 @@ def _basic_partitioning(G, n1, n2):
     print("Il primo cut size vale: ", cut_size_1)
     print("Il secondo cut size vale: ", cut_size_2)
 
-    #preparo il grafo risultante
-    # result_G =
 
     # Rimuovo gli archi del grafo che fanno parte dell'insieme di taglio
     if cut_size_1 < cut_size_2:
         component_final = component_test1
-        graph_division(G, component_final)
+        H = graph_division(G, component_final)
+        return H
     else:
         component_final = component_test2
-        graph_division(G, component_final)
+        H = graph_division(G, component_final)
+        return H
 
 
 
@@ -132,18 +135,27 @@ def _basic_partitioning(G, n1, n2):
         raise nx.NetworkXException("Non connected graph.")'''
 
 
+def _working_components(G):
+    '''
+    G è un grafo indiretto
+    Fornisce un generatore delle componenti di G
+    '''
+    for set in nx.connected_components(G):
+        yield G.subgraph(set).copy()
+
+
 def spectral_partitioning(G, class_nodes):
     # per integrore la parte di gestione dei nodi da stringhe a interi crea un'altra funzione
     # classes dev'essere una lista o una tupla
 
-    n = number_of_nodes(G)
+    G_nodes = number_of_nodes(G)
     given_nodes = sum(class_nodes)
 
     if is_empty(G):
         raise nx.NetworkXNotImplemented("Empty graph.")
-    if n < 2:
-        raise nx.NetworkXException("Too small graph.")
-    if given_nodes != n:
+    # if G_nodes < 2:
+    #    raise nx.NetworkXException("Too small graph.")
+    if given_nodes != G_nodes:
         raise nx.NetworkXException("Invalid classes")
     if is_weighted(G):
         raise nx.NetworkXNotImplemented("Weighted graph.")
@@ -159,12 +171,20 @@ def spectral_partitioning(G, class_nodes):
     classes = len(class_nodes)
 
     if classes == 1:
-        pass
-    elif classes == 2:
-        _basic_partitioning(G, *class_nodes)
+        yield G
     else:
         half = classes // 2
         big_class1_nodes = sum(class_nodes[:half])
         big_class2_nodes = sum(class_nodes[half:])
-        _basic_partitioning(G, big_class1_nodes, big_class2_nodes)
-
+        # working_graph = nx.convert_node_labels_to_integers(test_graph)
+        temp_G = _basic_partitioning(G, big_class1_nodes, big_class2_nodes)
+        nx.draw(temp_G, with_labels=True)
+        plt.savefig("debug.png")
+        plt.clf()
+        # meglio component_generator
+        for component in _working_components(temp_G):
+            component_nodes = number_of_nodes(component)
+            if component_nodes == big_class1_nodes:
+                yield from spectral_partitioning(component, class_nodes[:half])
+            else:
+                yield from spectral_partitioning(component, class_nodes[half:])
