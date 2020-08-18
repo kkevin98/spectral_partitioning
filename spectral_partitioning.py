@@ -82,6 +82,9 @@ if __name__ == "__main__":
     F = nx.Graph()
     F.add_edges_from(edgelist)
 
+    print("I nodi sono: ", nx.number_of_nodes(F))
+    print("Gli archi sono: ", nx.number_of_edges(F))
+
     # Numero di nodi in ciascuna classe.
     nodes = [12191, 12191]
 
