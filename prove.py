@@ -1,6 +1,8 @@
 import networkx as nx
+import csv
 import numpy as np
 import sys
+import pickle
 from time import sleep
 import matplotlib.pyplot as plt
 from networkx.generators.random_graphs import fast_gnp_random_graph
@@ -25,6 +27,8 @@ from networkx.classes.function import (
     number_of_edges
 )
 from my_network_lib import remove_self_edges, spectral_partitioning, _basic_partitioning, _working_components
+import pandas as pd
+
 
 
 def second_basic_partitioning(G, n1, n2):
@@ -122,6 +126,7 @@ def second_spectral_partitioning(G, class_nodes):
 
 if __name__ == "__main__":
 
+    """
     test_graph = fast_gnp_random_graph(100, .05)
     # test_graph = nx.read_edgelist("test_10_nodi.edgelist")
     print("Questo è il grafo di partenza")
@@ -130,27 +135,28 @@ if __name__ == "__main__":
     # print(test_graph.edges)
     print("Gli archi sono: ", number_of_edges(test_graph))
 
-    '''
-    for component in second_basic_partitioning(test_graph, 60, 40):
-        print("[Basic partitioning]:\n", component.nodes, "\n", component.edges)
-    
-    print("Test che non ho modificato il grafo originale:\n", test_graph.edges)
-    '''
-
-    print("--------------------------------------------------------------------------------------------------------------")
-
-    """
-    # sys.exit()
-
-    # Per disegnare i grafi
-    nx.draw(test_graph, with_labels=True)
-    plt.savefig("debug.png")
-    plt.clf()
-    """
-
     nodes = [25, 25, 25, 25]
     for component in second_spectral_partitioning(test_graph, nodes):
         print("fatto!!")
         print("I nodi sono: ", number_of_nodes(component))
         print("Gli archi sono: ", number_of_edges(component))
         # print("[Spectral_partitioning]:\n", component.nodes, "\n", component.edges)
+    print("Test che non ho modificato il grafo originale:\n", number_of_edges(test_graph))
+    """
+
+    node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
+    fool_csv_path = "/home/utente/Scaricati/Tesi/Louvain_3.csv"
+    F = nx.Graph()
+
+    # Legge e stampa il csv della mappatura dei nodi
+    nodes = pd.read_csv(node_csv_path)
+    data = nodes.set_index('Index')
+    print(data)
+    print(data.info())
+    data.to_dict('index').items()
+    F.add_nodes_from(data)
+
+    # Legge il csv di Louvain
+    fool_df = pd.read_csv(fool_csv_path, index_col=0)
+    print(fool_df.info())
+    #print(fool_df.shape)
