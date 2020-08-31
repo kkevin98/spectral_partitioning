@@ -73,11 +73,78 @@ def spectral_partitioning(G, class_nodes):
                 yield from spectral_partitioning(component, class_nodes[half:])
 
 
+def get_nodes(id_size_dict):
+    res = []
+    n_of_isolated_flights = id_size_dict.pop("None", 0)
+    for n in range(n_of_isolated_flights):
+        res.append(1)
+    res.extend(id_size_dict.values())
+    return res
+
+
+def get_flights(G):
+    """
+    Ottiene una lista contente i nomi dei voli all'interno del grafo G.
+
+    Da usare sulle componenti dello spectral_partitioning.
+
+    :param G: grafo avente nodi con l'attributo "Flight"
+    :return: lista con il valore dell'attributo "Flight" di ciascun nodo di G
+    """
+    flights = [fli for ind, fli in G.nodes(data="Flight")]
+    return flights
+
+
+def get_id(id_size_dict, wanted_size):
+    for comp_id, size in id_size_dict.items():
+        if size == wanted_size:
+            del id_size_dict[comp_id]
+            return comp_id
+
+
+def get_spectral_df(G, class_nodes, comp_to_size):
+
+    isolated_flights = []
+    flights_column = []
+    id_column = []
+    size_column = []
+
+    # Calcolo e salvataggio delle classi. Un file per ognuna di esse.
+    for C in spectral_partitioning(G, class_nodes):
+        size = C.number_of_nodes()
+        if size == 1:
+            flight = get_flights(C)
+            isolated_flights.extend(flight)
+        else:
+            flights = get_flights(C)
+            flights.sort()
+            comp_id = get_id(comp_to_size, size)
+            # Ottenuto quello di cui avevo bisogno, aggiorno le liste delle colonne
+            id_column.append(comp_id)
+            flights_column.append(flights)
+            size_column.append(size)
+
+    # Mi occupo dei voli isolati, se presenti
+    if isolated_flights:
+        amount = len(isolated_flights)
+        isolated_flights.sort()
+        id_column.append("None")
+        flights_column.append(isolated_flights)
+        size_column.append(amount)
+
+    df = pd.DataFrame({"ID": id_column,
+                       "FLIGHTS": flights_column,
+                       "SIZE": size_column}).sort_values(by="ID")
+
+    return df
+
+
 if __name__ == "__main__":
 
     node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
     edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
-    write_directory = "/home/utente/Scaricati/Tesi/"
+    infomap_path = "/home/utente/Scaricati/Tesi/Infomap_3.csv"
+    spectral_path = "/home/utente/Scaricati/Tesi/spectral_partitioning_from_infomap.csv"
     F = nx.Graph()
 
     # Per leggere i nodi di un grafo da un file csv.
@@ -91,13 +158,18 @@ if __name__ == "__main__":
     F.add_edges_from(edgelist)
 
     print("I nodi sono: ", nx.number_of_nodes(F))
-    print("Struttura del nodo: ", F[0])
+    print("Attributi dei nodi sono del tipo: ", F.nodes[0])
     print("Gli archi sono: ", nx.number_of_edges(F))
 
-    # Numero di nodi in ciascuna classe.
-    nodes = [14958, 14959]
-    # E se ci mettessi degli zeri?? Prima li dovrei togiere
+    # Leggo il file di louvain
+    louvain_df = pd.read_csv(infomap_path, index_col="MOD_CLASS")
+    id_to_size = dict(zip(louvain_df.index, louvain_df["SIZE"]))
+    nodes_in_components = get_nodes(id_to_size)
 
-    # Calcolo e salvataggio delle classi. Un file per ognuna di esse.
-    for i, component in enumerate(spectral_partitioning(F, nodes)):
-        nx.write_gpickle(component, write_directory+"res_component_{}.pickle".format(i + 1))
+    # F = F.subgraph(range(100))
+    # nodes_in_components = [1, 1, 1, 1, 1, 20, 20, 5, 50]
+    # id_to_size = {"0": 20, "1": 50, "2": 20, "3": 5, "None": 5}
+
+    spectral_df = get_spectral_df(F, nodes_in_components, id_to_size)
+
+    spectral_df.to_csv(spectral_path, index=False)
