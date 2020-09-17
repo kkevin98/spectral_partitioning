@@ -118,7 +118,7 @@ if __name__ == "__main__":
     # Non mi occupo della size del cluster perchè la posso ottenere facilmente dal csv di Louvain
     spectral_df = flight_to_id_df.groupby(["component"])["flight"].unique()
 
-    spectral_df = pd.DataFrame({"COMPONENT_ID": spectral_df.index,
+    spectral_df = pd.DataFrame({"GROUP_ID": spectral_df.index,
                                 "FLIGHTS": spectral_df.values})
 
     spectral_df["SIZE"] = 0

@@ -154,7 +154,7 @@ if __name__ == "__main__":
     components_df.to_csv(result_path, header=True, index=False, na_rep="None")
 
     # Salvo le 2 figure: una con i nodi colorati in base alla componente e l'altra normale
-    # OSS: I nodi isolati vengono colorati con lo stesso nome poiché
+    # OSS: I nodi isolati vengono colorati con lo stesso colore poiché
     #      appartengono tutti alla componente "None"
     printing_df = node_to_id_df.set_index('node')
     printing_df = printing_df.reindex(F.nodes())
@@ -168,7 +168,7 @@ if __name__ == "__main__":
             node_size=500,
             font_color="white"
             )
-    plt.savefig("sconnected.png")
+    plt.savefig("mygraph.png")
     plt.clf()
 
     nx.draw(F,
@@ -179,7 +179,7 @@ if __name__ == "__main__":
             node_size=500,
             font_color="white"
             )
-    plt.savefig("sconnected_res.png")
+    plt.savefig("mygraph_res.png")
     plt.clf()
 
     print(printing_df['group_id'].cat.codes)

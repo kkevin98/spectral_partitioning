@@ -69,9 +69,9 @@ def fill_mapped_flights(G, comp_id):
 if __name__ == "__main__":
 
     node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
-    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
-    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_3.csv"
-    spectral_path = "/home/utente/Scaricati/Tesi/sp_from_louvain.csv"
+    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_2"
+    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_2.csv"
+    spectral_path = "/home/utente/Scaricati/Tesi/sp_from_louvain_2.csv"
     F = nx.Graph()
 
     # Per leggere i nodi di un grafo da un file csv.
@@ -107,7 +107,6 @@ if __name__ == "__main__":
     # Dizionario in cui inserisco nome_volo-->id
     mapped_flights = {}
 
-    # Calcolo e salvataggio delle classi. Un file per ognuna di esse.
     for C in sp.spectral_partitioning(F, nodes_in_components):
         _size = C.number_of_nodes()
         component_id = get_component_id(_size, id_to_size)
@@ -118,7 +117,7 @@ if __name__ == "__main__":
     # Non mi occupo della size del cluster perchè la posso ottenere facilmente dal csv di Louvain
     spectral_df = flight_to_id_df.groupby(["component"])["flight"].unique()
 
-    spectral_df = pd.DataFrame({"COMPONENT_ID": spectral_df.index,
+    spectral_df = pd.DataFrame({"GROUP_ID": spectral_df.index,
                                 "FLIGHTS": spectral_df.values})
 
     spectral_df["SIZE"] = 0

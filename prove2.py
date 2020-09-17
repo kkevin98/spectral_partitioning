@@ -1,59 +1,60 @@
 import networkx as nx
 import pickle
 import pandas as pd
-
-
-def get_list(flights_string):
-    return flights_string[1:-1].split()
-
-
-def flights_in_common(row):
-    louvain_flights_list = get_list(row["LOUVAIN_FLIGHTS"])
-    sp_flights_list = get_list(row["SP_FLIGHTS"].replace(",", " "))
-    n_in_common = len(set(louvain_flights_list) & set(sp_flights_list))
-    return n_in_common
-
-def edges_per_component(row):
-
+import sys
+import matplotlib.pyplot as plt
 
 
 if __name__ == "__main__":
 
-    node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
-    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
-    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_3.csv"
-    infomap_path = "/home/utente/Scaricati/Tesi/Infomap_3.csv"
-    sp_louvain_path = "/home/utente/Scaricati/Tesi/sp_from_louvain.csv"
-    sp_infomap_path = "/home/utente/Scaricati/Tesi/sp_from_infomap.csv"
+    # Grafo semoplice
     F = nx.Graph()
+    archi = [(0, 1),
+             (0, 4),
+             (1, 2),
+             (1, 4),
+             (2, 3),
+             (3, 4),
+             (3, 5)
+             ]
+    F.add_edges_from(archi)
+    my_pos = nx.kamada_kawai_layout(F)
+    nx.draw(F,
+            with_labels=True,
+            pos=my_pos,
+            node_size=500,
+            node_color='#1E78B4',
+            font_color="white"
+            )
+    plt.savefig("simple_graph.png")
+    plt.clf()
 
-    # Per leggere i nodi di un grafo da un file csv.
-    nodes = pd.read_csv(node_csv_path)
-    data = nodes.set_index('Index').to_dict('index').items()
-    F.add_nodes_from(data)
+    # sys.exit()
 
-    # Per leggere una edgelist.
-    with open(edgelist_path, "rb") as fp:
-        edgelist = pickle.load(fp)
-    F.add_edges_from(edgelist)
+    # Grafo sconnesso
+    G = nx.Graph()
+    archi = [(0, 1),
+             (1, 2),
+             (3, 4),
+             (3, 5),
+             (3, 6),
+             (5, 6)
+             ]
+    G.add_edges_from(archi)
 
-    print("I nodi sono: ", nx.number_of_nodes(F))
-    print("Attributi dei nodi sono del tipo: ", list(F.nodes(data="Flight"))[0])
-    print("Gli archi sono: ", nx.number_of_edges(F))
-
-    # Louvain
-    louvain_df = pd.read_csv(louvain_path)
-    louvain_df = louvain_df.rename(columns={"MOD_CLASS": "ID", "FLIGHTS": "LOUVAIN_FLIGHTS"})
-
-    sp_louvain_df = pd.read_csv(sp_louvain_path)
-    sp_louvain_df = sp_louvain_df.rename(columns={"FLIGHTS": "SP_FLIGHTS"})
-
-    compare_louvain_df = pd.merge(louvain_df, sp_louvain_df, on=["ID", "SIZE"])
-
-    compare_louvain_df["IN_COMMON"] = compare_louvain_df.apply(flights_in_common, axis=1)
-
-    # Ricostruisco un grafo
-    
-
-
-    # Infomap
+    my_pos = nx.kamada_kawai_layout(G)
+    nx.draw_networkx_nodes(G, my_pos,
+                           nodelist=[0, 1, 2],
+                           node_color='#1E78B4',
+                           node_size=500,)
+    nx.draw_networkx_nodes(G, my_pos,
+                           nodelist=[3, 4, 5, 6],
+                           node_color='#FF781E',
+                           node_size=500,)
+    nx.draw_networkx_edges(G, my_pos)
+    labels = {}
+    labels[0] = 'A'
+    labels[5] = 'B'
+    nx.draw_networkx_labels(G, my_pos, labels, font_color='white')
+    plt.axis('off')
+    plt.savefig("disconnected_graph.png")  # save as png
