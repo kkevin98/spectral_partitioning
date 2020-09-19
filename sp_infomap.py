@@ -63,6 +63,8 @@ def fill_mapped_flights(G, comp_id):
     :return: None
     """
     for ind, fli in G.nodes(data="Flight"):
+        # if fli in mapped_flights:
+        #     print('Ho sgammato un doppio: ', fli)
         mapped_flights[fli] = comp_id
 
 
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
     edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
     infomap_path = "/home/utente/Scaricati/Tesi/Infomap_3.csv"
-    spectral_path = "/home/utente/Scaricati/Tesi/sp_from_infomap.csv"
+    spectral_path = "/home/utente/Scaricati/Tesi/sp_from_infomap_3.csv"
     F = nx.Graph()
 
     # Per leggere i nodi di un grafo da un file csv.
@@ -96,9 +98,13 @@ if __name__ == "__main__":
 
     # Associo ad ogni componente la sua taglia
     id_to_size = dict(zip(infomap_df["CLUSTER"], infomap_df["SIZE"]))
+    # print(id_to_size)
 
     # Trovo le componenti in cui dividerò F
     nodes_in_components = get_components_size(infomap_df)
+    # print(nodes_in_components)
+    # print('Ci sono: ', nodes_in_components.count(1), 'uni')
+    # print('I nodi in totale sono: ', sum(nodes_in_components))
 
     # F = F.subgraph(range(100))
     # nodes_in_components = [1, 1, 1, 1, 1, 20, 20, 5, 50]
@@ -107,10 +113,12 @@ if __name__ == "__main__":
     # Dizionario in cui inserisco nome_volo-->id
     mapped_flights = {}
 
+    # print('Prima di entrare nell algo richiedo: ', nodes_in_components)
     # Calcolo e salvataggio delle classi. Un file per ognuna di esse.
     for C in sp.spectral_partitioning(F, nodes_in_components):
         _size = C.number_of_nodes()
         component_id = get_component_id(_size, id_to_size)
+        # print("Info sulla comp. spettrale: ", _size, component_id)  #La fregatura sta nel 4+5=9 non smezza e quindi non riconosce la componente
         fill_mapped_flights(C, component_id)
 
     flight_to_id_df = pd.DataFrame(mapped_flights.items(), columns=["flight", "component"]).sort_values(by=["flight"])

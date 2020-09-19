@@ -61,9 +61,9 @@ def mean_degree(C):
 if __name__ == "__main__":
 
     node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
-    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
-    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_3.csv"
-    sp_louvain_path = "/home/utente/Scaricati/Tesi/sp_from_louvain.csv"
+    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_2"
+    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_2.csv"
+    sp_louvain_path = "/home/utente/Scaricati/Tesi/sp_from_louvain_2.csv"
     res_directory = "/home/utente/Scaricati/Tesi/More_info/"
     F = nx.Graph()
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     res_louvain_df = pd.DataFrame(louvain_columns)
 
-    res_louvain_df.to_csv(res_directory + 'info_louvain_3.csv', header=True, index=False)
+    res_louvain_df.to_csv(res_directory + 'info_louvain_2.csv', header=True, index=False)
 
     # Calcolo dei parametri interessanti: per sp_louvain
     # Suppongo che la comp. dei voli isolati sia messa in fondo
@@ -147,4 +147,4 @@ if __name__ == "__main__":
 
     res_sp_louvain_df = pd.DataFrame(sp_louvain_columns)
 
-    res_sp_louvain_df.to_csv(res_directory + 'info_sp_from_louvain_3.csv', header=True, index=False)
+    res_sp_louvain_df.to_csv(res_directory + 'info_sp_from_louvain_2.csv', header=True, index=False)

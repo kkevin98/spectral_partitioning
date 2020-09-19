@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
+    test = {'A':1, 'Z':-1}
+    print(test['B'])
+
     # Grafo semoplice
     F = nx.Graph()
     archi = [(0, 1),
@@ -55,6 +58,7 @@ if __name__ == "__main__":
     labels = {}
     labels[0] = 'A'
     labels[5] = 'B'
+    labels[2] = 'C'
     nx.draw_networkx_labels(G, my_pos, labels, font_color='white')
     plt.axis('off')
     plt.savefig("disconnected_graph.png")  # save as png

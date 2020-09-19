@@ -18,39 +18,49 @@ def _basic_partitioning(G, n1, n2):
     # Lista di nodi ordinati secondo il vettore di Fiedler
     ordered_nodes = nx.spectral_ordering(G, method="lanczos")  # Torna una list non un nunmpy array
 
-    component_test1 = set(ordered_nodes[:n1])
-    component_test2 = set(ordered_nodes[:n2])
+    group_test_1 = set(ordered_nodes[:n1])  # primi n1
+    group_test_2 = set(ordered_nodes[:n2])  # primi n2
 
-    cut_size_1 = nx.cut_size(G, component_test1)
-    cut_size_2 = nx.cut_size(G, component_test2)
+    cut_size_1 = nx.cut_size(G, group_test_1)
+    cut_size_2 = nx.cut_size(G, group_test_2)
 
     # Scelgo la componente che dividerà il grafo in base al peso del suo insieme di taglio
     if cut_size_1 < cut_size_2:
-        component_final = component_test1
-        remaining_nodes = set(ordered_nodes[n1:])
+        final_group = group_test_1
+        remaining_group = set(ordered_nodes[n1:])
+        G_1 = G.subgraph(final_group)
+        G_2 = G.subgraph(remaining_group)
     else:
-        component_final = component_test2
-        remaining_nodes = set(ordered_nodes[n2:])
+        final_group = group_test_2  # n2
+        remaining_group = set(ordered_nodes[n2:])  #n1
+        G_1 = G.subgraph(remaining_group)
+        G_2 = G.subgraph(final_group)
 
-    G_1 = G.subgraph(component_final)
-    G_2 = G.subgraph(remaining_nodes)
+    # Fuori dall'if non va bene per il caso di spectral_partitioning([9,(5, 4)]
+    # G_1 = G.subgraph(final_group)
+    # G_2 = G.subgraph(remaining_group)
+    # G_1 avrà sempre big_class1_nodes e G_2 avrà sempre big_class2_nodes
+    # print('basic part. primo gruppo ha nodi: ', nx.number_of_nodes(G_1))
+    # print('basic part. secondo gruppo ha nodi: ', nx.number_of_nodes(G_2))
     yield from (G_1, G_2)
 
 
-def spectral_partitioning(G, classes_nodes):
+def spectral_partitioning(G, groups_nodes):
     """
     Genera un numero di classi composte da un certo numero di nodi a partire da G.
 
     :param G: grafo semplice connesso
-    :param classes_nodes: lista o tupla contenente il numero di vertici di ciascuna componente
+    :param groups_nodes: lista o tupla contenente il numero di vertici di ciascuna componente
     :return: generatore di grafi
     """
 
     G_nodes = nx.number_of_nodes(G)
-    given_nodes = sum(classes_nodes)
+    given_nodes = sum(groups_nodes)
+    # print('G_nodes: ', G_nodes)
+    # print('given_nodes:', groups_nodes, ', with sum = ', given_nodes)
 
-    if (given_nodes != G_nodes) or (0 in classes_nodes):
-        raise nx.NetworkXException("Invalid classes")
+    if (given_nodes != G_nodes) or (0 in groups_nodes):
+        raise nx.NetworkXException("Invalid gruops")
     if nx.is_weighted(G):
         raise nx.NetworkXNotImplemented("Weighted graph.")
     if nx.is_directed(G):
@@ -58,21 +68,30 @@ def spectral_partitioning(G, classes_nodes):
     if nx.number_of_selfloops(G):
         raise nx.NetworkXNotImplemented("Graph with self-edges.")
 
-    classes = len(classes_nodes)  # numero delle componenti in cui dividere G
+    gruops = len(groups_nodes)  # numero delle componenti in cui dividere G
 
-    if classes == 1:
+    if gruops == 1:
         yield G
     else:
-        half = classes // 2
-        big_class1_nodes = sum(classes_nodes[:half])
-        big_class2_nodes = sum(classes_nodes[half:])
+        half = gruops // 2
+        big_group_1_nodes = sum(groups_nodes[:half])
+        big_group_2_nodes = sum(groups_nodes[half:])
+        # print('big_group_1_nodes: ', big_group_1_nodes)
+        # print('big_group_2_nodes: ', big_group_2_nodes)
         # divido in 2 G e delego il compito di proseguire con la divisione
-        for component in _basic_partitioning(G, big_class1_nodes, big_class2_nodes):
-            component_nodes = nx.number_of_nodes(component)
-            if component_nodes == big_class1_nodes:
-                yield from spectral_partitioning(component, classes_nodes[:half])
-            else:
-                yield from spectral_partitioning(component, classes_nodes[half:])
+        big_groups = [group for group in _basic_partitioning(G, big_group_1_nodes, big_group_2_nodes)]
+        yield from spectral_partitioning(big_groups[0], groups_nodes[:half])
+        yield from spectral_partitioning(big_groups[1], groups_nodes[half:])
+
+        # vecchia versione delle ultime 3 rghe di codice
+        # for component in _basic_partitioning(G, big_group_1_nodes, big_group_2_nodes):
+        #     #con le modifiche a basic_partitionig ho la sicurezza dell'ordine
+        #
+        #     component_nodes = nx.number_of_nodes(component)
+        #     if component_nodes == big_group_1_nodes:
+        #         yield from spectral_partitioning(component, classes_nodes[:half])
+        #     else:
+        #         yield from spectral_partitioning(component, classes_nodes[half:])
 
 
 def fill_mapped_nodes(G, comp_id):
@@ -115,26 +134,6 @@ if __name__ == "__main__":
 
     # Numero di nodi in ciascuna classe.
     nodes = [14958, 14959]
-
-    # Creazione di un grafo casuale
-    F = nx.fast_gnp_random_graph(12, .5)
-    nodes = [3, 2, 7]
-
-    # Grafo che genera componenti sconnesse
-    F = nx.Graph()
-    archi = [(0, 2),
-             (2, 3),
-             (3, 4),
-             (2, 4),
-             (2, 7),
-             (1, 5),
-             (5, 6),
-             (6, 7),
-             (5, 7),
-             (5, 4)
-             ]
-    F.add_edges_from(archi)
-    nodes = [2, 6]
 
     mapped_nodes = {}
 
@@ -220,3 +219,7 @@ if __name__ == "__main__":
     #          ]
     # F.add_edges_from(archi)
     # nodes = [6, 6]
+
+    # # Creazione di un grafo casuale
+    # F = nx.fast_gnp_random_graph(12, .5)
+    # nodes = [3, 2, 7]

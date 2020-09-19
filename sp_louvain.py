@@ -69,9 +69,9 @@ def fill_mapped_flights(G, comp_id):
 if __name__ == "__main__":
 
     node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
-    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_2"
-    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_2.csv"
-    spectral_path = "/home/utente/Scaricati/Tesi/sp_from_louvain_2.csv"
+    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_1"
+    louvain_path = "/home/utente/Scaricati/Tesi/Louvain_1.csv"
+    spectral_path = "/home/utente/Scaricati/Tesi/sp_from_louvain_1.csv"
     F = nx.Graph()
 
     # Per leggere i nodi di un grafo da un file csv.
@@ -99,6 +99,9 @@ if __name__ == "__main__":
 
     # Trovo le componenti in cui dividerò F
     nodes_in_components = get_components_size(louvain_df)
+    print(nodes_in_components)
+    print('Ci sono: ', nodes_in_components.count(1), 'uni')
+    print('I nodi in totale sono: ', sum(nodes_in_components))
 
     # F = F.subgraph(range(100))
     # nodes_in_components = [1, 1, 1, 1, 1, 20, 20, 5, 50]

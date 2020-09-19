@@ -60,9 +60,9 @@ def mean_degree(C):
 
 if __name__ == "__main__":
     node_csv_path = "/home/utente/Scaricati/Tesi/index_flight.csv"
-    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_3"
-    infomap_path = "/home/utente/Scaricati/Tesi/Infomap_3.csv"
-    sp_infomap_path = "/home/utente/Scaricati/Tesi/sp_from_infomap.csv"
+    edgelist_path = "/home/utente/Scaricati/Tesi/edgelist_2"
+    infomap_path = "/home/utente/Scaricati/Tesi/infomap_clusters_2.csv"
+    sp_infomap_path = "/home/utente/Scaricati/Tesi/sp_from_infomap_2.csv"
     res_directory = "/home/utente/Scaricati/Tesi/More_info/"
     F = nx.Graph()
 
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     res_infomap_df = pd.DataFrame(infomap_columns)
 
-    res_infomap_df.to_csv(res_directory + 'info_infomap_3.csv', header=True, index=False)
+    res_infomap_df.to_csv(res_directory + 'info_infomap_2.csv', header=True, index=False)
 
     # Calcolo dei parametri interessanti: per sp_louvain
     # Suppongo che la comp. dei voli isolati sia messa in fondo
@@ -146,4 +146,4 @@ if __name__ == "__main__":
 
     res_sp_infomap_df = pd.DataFrame(sp_infomap_columns)
 
-    res_sp_infomap_df.to_csv(res_directory + 'info_sp_from_infomap_3.csv', header=True, index=False)
+    res_sp_infomap_df.to_csv(res_directory + 'info_sp_from_infomap_2.csv', header=True, index=False)
